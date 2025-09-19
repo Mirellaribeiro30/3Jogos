@@ -15,15 +15,15 @@ html, body {
   /* Remove margens e padding padrão e ocupa 100% da tela */
   background:#111; /* Fundo escuro da página */
   overflow:hidden; /* Remove barras de rolagem */
-  font-family:Arial; /* Define fonte usada na página */
+  font-family:Arial; /* Fonte utilizada no jogo */
   display:flex; justify-content:center; align-items:center;
-  /* Centraliza todos os elementos dentro do body horizontal e verticalmente */
+  /* Centraliza os elementos da página horizontal e verticalmente */
 }
 
 /* Canvas onde o jogo é desenhado */
 canvas {
   background:#222; /* Fundo do canvas mais escuro que o body */
-  border:2px solid #555; /* Borda cinza ao redor do canvas */
+  border:2px solid #555; /* Borda cinza */
   display:block; /* Exibe como bloco */
 }
 
@@ -38,9 +38,7 @@ canvas {
 /* Telas do jogo (start, instruções, game over) */
 .screen {
   position:fixed; top:0; left:0; width:100%; height:100%;
-  /* Cada tela ocupa toda a janela */
   display:flex; justify-content:center; align-items:center;
-  /* Centraliza conteúdos horizontal e verticalmente */
   flex-direction:column; /* Organiza elementos em coluna */
   background:#111; /* Fundo escuro */
   color:white; /* Texto branco */
@@ -49,22 +47,18 @@ canvas {
 /* Input para número de vidas */
 .screen input {
   width:50px; font-size:20px; text-align:center;
-  /* Largura pequena, fonte maior, texto centralizado */
 }
 
 /* Botões */
 .screen button {
-  margin-top:20px; /* Espaço acima do botão */
-  padding:10px 20px; /* Espaçamento interno do botão */
-  font-size:20px; /* Fonte maior para visibilidade */
+  margin-top:20px;
+  padding:10px 20px;
+  font-size:20px;
   cursor:pointer; /* Cursor de mão ao passar sobre o botão */
 }
 
 /* Tela de Game Over */
-#gameOverScreen { 
-  display:none; /* Inicialmente escondido */
-  background:rgba(0,0,0,0.7); /* Fundo semi-transparente */
-}
+#gameOverScreen { display:none; background:rgba(0,0,0,0.7); }
 
 /* Tela de Instruções */
 #instructionScreen {
@@ -73,13 +67,13 @@ canvas {
   text-align: center; /* Centraliza o texto */
   padding: 40px; /* Espaçamento interno */
   position: relative; /* Para posicionar o botão X */
-  box-sizing: border-box; /* Inclui padding e borda na largura/altura */
+  box-sizing: border-box;
 }
 
 /* Botão de fechar instruções */
 #instructionScreen button {
-  position: absolute; /* Posicionado em relação ao container */
-  top: 10px; right: 10px; /* Canto superior direito */
+  position: absolute;
+  top: 10px; right: 10px;
   font-size: 20px;
   cursor: pointer;
 }
@@ -129,51 +123,51 @@ bgm.loop=true; bgm.volume=0.3;          // Loop contínuo e volume baixo
 
 // --- VARIÁVEIS PRINCIPAIS ---
 const canvas = document.getElementById('gameCanvas'); // Canvas do jogo
-const ctx = canvas.getContext('2d');                  // Contexto de desenho 2D
-const gameWidth = canvas.width;                       // Largura inicial do canvas
-const gameHeight = canvas.height;                     // Altura inicial do canvas
+const ctx = canvas.getContext('2d');                  // Contexto de desenho
+const gameWidth = canvas.width;                       // Largura do canvas
+const gameHeight = canvas.height;                     // Altura do canvas
 
 // Posição do mouse
-let mouseX = gameWidth / 2; // Inicializa no meio horizontal do canvas
+let mouseX = gameWidth / 2;
 
 // Estado do jogo
 let score = 0;        // Pontuação atual
 let lives = 3;        // Vidas restantes
 let level = 1;        // Nível atual
 let fallSpeed = 3;    // Velocidade de queda dos objetos
-let spawnInterval = 1000; // Intervalo de spawn de objetos em milissegundos
+let spawnInterval = 1000; // Intervalo de spawn de objetos (ms)
 let lastSpawn = 0;        // Timestamp do último spawn
 
 // Objetos e partículas
-let objects = [];           // Lista de asteroides e estrelas ativos
-let starsBackground = [];   // Lista de estrelas de fundo
+let objects = [];           // Asteroides e estrelas
+let starsBackground = [];   // Estrelas do fundo
 let asteroidParticles = []; // Partículas de asteroides
 let explosionParticles = [];// Partículas de explosão
 let selectedLives = 3;      // Vidas escolhidas pelo jogador
 
 // Jogador
 const player = {
-  x: gameWidth / 2 - 20,  // Posição X inicial (meio da tela)
-  y: gameHeight - 90,     // Posição Y inicial (próximo ao fundo)
+  x: gameWidth / 2 - 20,  // Posição X inicial
+  y: gameHeight - 90,     // Posição Y inicial
   width: 40, height: 60,  // Tamanho da nave
-  speed: 10               // Velocidade (não usada)
+  speed: 10               // Velocidade (não usada no teclado)
 };
 
 // Estado do jogo: start, playing, gameover
 let gameState = "start";
 
 // --- ELEMENTOS HTML ---
-const startScreen = document.getElementById('startScreen'); // Tela inicial
-const lifeInput = document.getElementById('lifeInput');     // Input de vidas
-const startButton = document.getElementById('startButton'); // Botão começar
-const instructionScreen = document.getElementById('instructionScreen'); // Tela de instruções
-const closeInstructions = document.getElementById('closeInstructions'); // Botão fechar instruções
-const hud = document.getElementById('hud');                 // HUD
-const scoreEl = document.getElementById('score');          // Texto pontuação
-const livesEl = document.getElementById('lives');          // Texto vidas
-const gameOverScreen = document.getElementById('gameOverScreen'); // Tela Game Over
-const finalScore = document.getElementById('finalScore');  // Texto pontuação final
-const restartButton = document.getElementById('restartButton'); // Botão reiniciar
+const startScreen = document.getElementById('startScreen');
+const lifeInput = document.getElementById('lifeInput');
+const startButton = document.getElementById('startButton');
+const instructionScreen = document.getElementById('instructionScreen');
+const closeInstructions = document.getElementById('closeInstructions');
+const hud = document.getElementById('hud');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScore = document.getElementById('finalScore');
+const restartButton = document.getElementById('restartButton');
 
 // --- EVENTOS ---
 // Botão começar: seleciona vidas e mostra instruções
@@ -189,45 +183,42 @@ startButton.addEventListener('click', () => {
 
 // Botão fechar instruções: inicia o jogo
 closeInstructions.addEventListener('click', () => {
-  instructionScreen.style.display='none'; // Esconde instruções
-  canvas.style.display='block';           // Mostra canvas
-  hud.style.display='block';              // Mostra HUD
-  createBackgroundStars(100);             // Cria 100 estrelas de fundo
-  lastSpawn = Date.now();                 // Marca horário do último spawn
-  gameState='playing';                    // Muda estado para "playing"
-  bgm.currentTime=0; bgm.play();          // Reinicia e toca música
-  requestAnimationFrame(gameLoop);        // Inicia loop do jogo
+  instructionScreen.style.display='none';
+  canvas.style.display='block'; hud.style.display='block';
+  createBackgroundStars(100); lastSpawn = Date.now();
+  gameState='playing'; bgm.currentTime=0; bgm.play();
+  requestAnimationFrame(gameLoop); // Inicia loop do jogo
 });
 
 // Botão reiniciar no Game Over
 restartButton.addEventListener('click', () => {
   lives = selectedLives; score = 0; level = 1; fallSpeed = 3; spawnInterval = 1000; objects = [];
   asteroidParticles = []; explosionParticles = [];
-  createBackgroundStars(100);             // Cria estrelas de fundo
-  gameOverScreen.style.display='none';    // Esconde tela Game Over
-  canvas.style.display='block'; hud.style.display='block'; // Mostra canvas e HUD
-  gameState='playing'; bgm.currentTime=0; bgm.play();      // Reinicia música e jogo
-  requestAnimationFrame(gameLoop);        // Reinicia loop
+  createBackgroundStars(100);
+  gameOverScreen.style.display='none';
+  canvas.style.display='block'; hud.style.display='block';
+  gameState='playing'; bgm.currentTime=0; bgm.play();
+  requestAnimationFrame(gameLoop);
 });
 
 // Movimento do mouse
 canvas.addEventListener('mousemove', e=>{
-  const rect = canvas.getBoundingClientRect(); // Pega posição do canvas na tela
+  const rect = canvas.getBoundingClientRect(); // Posição do canvas na tela
   mouseX = e.clientX - rect.left;              // Calcula posição X relativa ao canvas
 });
 
 // --- FUNÇÕES ---
 // Cria estrelas de fundo com efeito de pulsar
 function createBackgroundStars(num) {
-  starsBackground = []; // Reseta lista de estrelas
+  starsBackground = [];
   for(let i=0;i<num;i++){
     starsBackground.push({
-      x:Math.random()*gameWidth,      // Posição X aleatória
-      y:Math.random()*gameHeight,     // Posição Y aleatória
-      size:Math.random()*2+1,         // Tamanho da estrela
-      speed:Math.random()*0.5+0.2,    // Velocidade de queda
-      alpha:Math.random(),             // Transparência inicial
-      pulse:Math.random()*0.05         // Velocidade de pulso de brilho
+      x:Math.random()*gameWidth,
+      y:Math.random()*gameHeight,
+      size:Math.random()*2+1,        // Tamanho da estrela
+      speed:Math.random()*0.5+0.2,   // Velocidade de queda
+      alpha:Math.random(),            // Transparência
+      pulse:Math.random()*0.05        // Velocidade de pulso de brilho
     });
   }
 }
@@ -236,7 +227,7 @@ function createBackgroundStars(num) {
 function drawBackground(){
   ctx.fillStyle="#222"; ctx.fillRect(0,0,gameWidth,gameHeight); // Fundo escuro
   starsBackground.forEach(star=>{
-    star.alpha += star.pulse; if(star.alpha>1||star.alpha<0.2) star.pulse*=-1; // Faz pulsar
+    star.alpha += star.pulse; if(star.alpha>1||star.alpha<0.2) star.pulse*=-1;
     ctx.beginPath();
     const gradient=ctx.createRadialGradient(star.x,star.y,0,star.x,star.y,star.size*2);
     gradient.addColorStop(0, `rgba(255,255,200,${star.alpha})`);
@@ -253,9 +244,9 @@ function drawBackground(){
 function spawnObject(){
   const type=Math.random()<0.7?"asteroid":"star"; // 70% asteroide, 30% estrela
   objects.push({
-    x:Math.random()*(gameWidth-50), // Posição X aleatória
-    y:-50,                           // Começa acima da tela
-    width:type==="asteroid"?50:30,   // Tamanho depende do tipo
+    x:Math.random()*(gameWidth-50),
+    y:-50,
+    width:type==="asteroid"?50:30,
     height:type==="asteroid"?50:30,
     type:type
   });
@@ -263,10 +254,10 @@ function spawnObject(){
 
 // Atualiza posição e colisões dos objetos
 function updateObjects(){
-  const now = Date.now();                // Hora atual
-  if(now-lastSpawn>spawnInterval){ spawnObject(); lastSpawn=now; } // Cria novo objeto
-  for(let i=objects.length-1;i>=0;i--){ // Percorre objetos
-    const obj = objects[i]; obj.y+=fallSpeed; // Move objeto para baixo
+  const now = Date.now();
+  if(now-lastSpawn>spawnInterval){ spawnObject(); lastSpawn=now; }
+  for(let i=objects.length-1;i>=0;i--){
+    const obj = objects[i]; obj.y+=fallSpeed;
 
     // Colisão com jogador
     if(obj.x<player.x+player.width && obj.x+obj.width>player.x &&
@@ -280,160 +271,94 @@ function updateObjects(){
         spawnExplosionParticles(player.x+player.width/2, player.y+player.height/2); 
         if(lives<=0) gameState='gameover'; 
       }
-      objects.splice(i,1); checkLevelUp(); continue; // Remove objeto
+      objects.splice(i,1); checkLevelUp(); continue;
     }
 
-    if(obj.type==="asteroid") spawnAsteroidParticles(obj.x+obj.width/2, obj.y+obj.height/2); // Partículas
+    if(obj.type==="asteroid") spawnAsteroidParticles(obj.x+obj.width/2, obj.y+obj.height/2);
     if(obj.y>gameHeight) objects.splice(i,1); // Remove objetos fora da tela
   }
 }
 
 // Checa se jogador subiu de nível
 function checkLevelUp(){
-  if(score>0 && score%10===0){ 
-    level++; 
-    fallSpeed+=0.5; 
-    if(spawnInterval>300) spawn
-    Interval-=80; // Diminui o intervalo de spawn a cada 10 pontos
-  }
+  if(score>0 && score%10===0){ level++; fallSpeed+=0.5; if(spawnInterval>300) spawnInterval-=80; }
 }
 
 // --- PARTICULAS ---
-// Cria partículas de asteroide para efeito visual
 function spawnAsteroidParticles(cx,cy,color="#bbb",count=2){ 
-  for(let i=0;i<count;i++) 
-    asteroidParticles.push({
-      x:cx, y:cy, 
-      vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, // Velocidade aleatória
-      size:Math.random()*3+1, color:color, life:25 // Tamanho, cor e duração
-    }); 
+  for(let i=0;i<count;i++) asteroidParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,size:Math.random()*3+1,color:color,life:25}); 
 }
-
-// Cria partículas de explosão quando o jogador é atingido
 function spawnExplosionParticles(cx,cy,count=20){ 
-  for(let i=0;i<count;i++) 
-    explosionParticles.push({
-      x:cx, y:cy, 
-      vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, // Velocidade aleatória
-      size:Math.random()*4+2, 
-      color:`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0,1)`, // Cor aleatória
-      life:40 // Duração da partícula
-    }); 
+  for(let i=0;i<count;i++) explosionParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,size:Math.random()*4+2,color:`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0,1)`,life:40}); 
 }
-
-// Atualiza partículas, remove quando a vida acaba
 function updateParticles(){ 
-  for(let i=asteroidParticles.length-1;i>=0;i--){ 
-    let p=asteroidParticles[i];
-    p.x+=p.vx; p.y+=p.vy; p.life--; 
-    if(p.life<=0) asteroidParticles.splice(i,1); // Remove partículas mortas
-  }
-  for(let i=explosionParticles.length-1;i>=0;i--){
-    let p=explosionParticles[i];
-    p.x+=p.vx; p.y+=p.vy; p.life--; 
-    if(p.life<=0) explosionParticles.splice(i,1);
-  }
+  for(let i=asteroidParticles.length-1;i>=0;i--){let p=asteroidParticles[i];p.x+=p.vx;p.y+=p.vy;p.life--; if(p.life<=0) asteroidParticles.splice(i,1); }
+  for(let i=explosionParticles.length-1;i>=0;i--){let p=explosionParticles[i];p.x+=p.vx;p.y+=p.vy;p.life--; if(p.life<=0) explosionParticles.splice(i,1); }
 }
-
-// Desenha partículas na tela
 function drawParticles(){ 
-  asteroidParticles.forEach(p=>{
-    ctx.fillStyle=p.color;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
-  });
-  explosionParticles.forEach(p=>{
-    ctx.fillStyle=p.color;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
-  });
+  asteroidParticles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();});
+  explosionParticles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();});
 }
 
 // --- DESENHO OBJETOS ---
-// Desenha um asteroide
 function drawAsteroid(obj){ 
-  const cx=obj.x+obj.width/2, cy=obj.y+obj.height/2, r=obj.width/2; 
+  const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,r=obj.width/2; 
   ctx.fillStyle="#888"; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); 
   ctx.fillStyle="#666"; ctx.beginPath(); ctx.arc(cx-r*0.3,cy-r*0.2,r*0.2,0,Math.PI*2); ctx.fill(); 
   ctx.beginPath(); ctx.arc(cx+r*0.2,cy+r*0.3,r*0.15,0,Math.PI*2); ctx.fill(); 
   ctx.strokeStyle="#555"; ctx.stroke(); 
 }
-
-// Desenha uma estrela
 function drawStar(obj){ 
-  const cx=obj.x+obj.width/2, cy=obj.y+obj.height/2, spikes=5, outerR=obj.width/2, innerR=outerR/2; 
-  let rot=Math.PI/2*3, step=Math.PI/spikes; 
-  ctx.fillStyle="gold"; ctx.beginPath(); 
-  ctx.moveTo(cx,cy-outerR); 
+  const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,spikes=5,outerR=obj.width/2,innerR=outerR/2; 
+  let rot=Math.PI/2*3,step=Math.PI/spikes; ctx.fillStyle="gold"; ctx.beginPath(); ctx.moveTo(cx,cy-outerR); 
   for(let i=0;i<spikes;i++){ 
     ctx.lineTo(cx+Math.cos(rot)*outerR,cy+Math.sin(rot)*outerR); rot+=step; 
     ctx.lineTo(cx+Math.cos(rot)*innerR,cy+Math.sin(rot)*innerR); rot+=step; 
-  } 
-  ctx.closePath(); ctx.fill(); 
+  } ctx.closePath(); ctx.fill(); 
 }
-
-// Desenha todos os objetos (asteroides e estrelas)
-function drawObjects(){ 
-  objects.forEach(o=>o.type==="asteroid"?drawAsteroid(o):drawStar(o)); 
-}
+function drawObjects(){ objects.forEach(o=>o.type==="asteroid"?drawAsteroid(o):drawStar(o)); }
 
 // --- PLAYER ---
-// Atualiza posição do jogador com base no mouse
 function updatePlayer(){
-  player.x += (mouseX - player.x - player.width/2)*0.1; // Movimento suave
+  // Movimento apenas pelo mouse, suave
+  player.x += (mouseX - player.x - player.width/2)*0.1;
   if(player.x<0) player.x=0; // Limite esquerda
   if(player.x>gameWidth-player.width) player.x=gameWidth-player.width; // Limite direita
 }
-
-// Desenha o jogador na tela
 function drawPlayer(){
   ctx.fillStyle="gray"; ctx.fillRect(player.x,player.y,player.width,player.height);
-  const blink=Math.random()*0.5+0.5; // Efeito de brilho
+  const blink=Math.random()*0.5+0.5;
   ctx.fillStyle=`rgba(0,191,255,${blink})`;
   ctx.fillRect(player.x+player.width*0.3,player.y+player.height*0.1,player.width*0.4,player.height*0.25);
-  // Desenha detalhes vermelhos da nave
   ctx.fillStyle="red";
-  ctx.beginPath(); 
-  ctx.moveTo(player.x,player.y+player.height*0.6); 
-  ctx.lineTo(player.x-12,player.y+player.height); 
-  ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); 
-  ctx.closePath(); ctx.fill();
-  ctx.beginPath(); 
-  ctx.moveTo(player.x+player.width,player.y+player.height*0.6); 
-  ctx.lineTo(player.x+player.width+12,player.y+player.height); 
-  ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); 
-  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(player.x,player.y+player.height*0.6); ctx.lineTo(player.x-12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(player.x+player.width,player.y+player.height*0.6); ctx.lineTo(player.x+player.width+12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill();
 }
 
 // --- HUD ---
-// Atualiza a pontuação e vidas na tela
 function updateHUD(){ 
   scoreEl.innerText="Pontuação: "+score; 
   livesEl.innerText="Vidas: "+lives; 
 }
 
 // --- LOOP PRINCIPAL ---
-// Função que roda o jogo a cada frame
 function gameLoop(){
   if(gameState!=="playing"){ // Se não estiver jogando
     if(gameState==="gameover"){ // Se acabou
-      bgm.pause(); 
-      canvas.style.display='none'; hud.style.display='none'; gameOverScreen.style.display='flex';
+      bgm.pause(); canvas.style.display='none'; hud.style.display='none'; gameOverScreen.style.display='flex';
       finalScore.innerText="Pontuação final: "+score;
     }
     return; // Para o loop
   }
-  drawBackground(); // Desenha fundo
-  updatePlayer(); // Atualiza posição do jogador
-  updateObjects(); // Atualiza objetos (queda, colisão)
-  updateParticles(); // Atualiza partículas
-  drawObjects(); // Desenha objetos
-  drawPlayer(); // Desenha jogador
-  drawParticles(); // Desenha partículas
-  updateHUD(); // Atualiza HUD
-  requestAnimationFrame(gameLoop); // Chama próximo frame
+  drawBackground();
+  updatePlayer();
+  updateObjects();
+  updateParticles();
+  drawObjects();
+  drawPlayer();
+  drawParticles();
+  updateHUD();
+  requestAnimationFrame(gameLoop); // Próximo frame
 }
 </script>
 </body>
