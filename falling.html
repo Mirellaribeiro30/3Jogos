@@ -1,93 +1,167 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html> <!-- Declara que este documento é HTML5 -->
+<html lang="pt-BR"> <!-- Define o idioma do documento como Português do Brasil -->
 <head>
-<meta charset="UTF-8">
-<title>Falling Objects Game</title>
+<meta charset="UTF-8"> <!-- Define a codificação de caracteres como UTF-8 -->
+<title>Falling Objects Game</title> <!-- Título que aparece na aba do navegador -->
 <style>
+/* --- Estilos gerais da página --- */
 html, body {
-  margin:0; padding:0; width:100%; height:100%;
-  background:#111; overflow:hidden;
-  font-family:Arial;
-  display:flex; justify-content:center; align-items:center;
+  margin:0; /* Remove margem padrão do navegador */
+  padding:0; /* Remove padding padrão */
+  width:100%; /* Largura total da tela */
+  height:100%; /* Altura total da tela */
+  background:#111; /* Cor de fundo da página */
+  overflow:hidden; /* Evita barra de rolagem */
+  font-family:Arial, sans-serif; /* Fonte padrão da página */
+  display:flex; justify-content:center; align-items:center; /* Centraliza o conteúdo horizontal e verticalmente */
 }
 canvas {
-  background:#222;
-  border:2px solid #555;
-  display:block;
+  background:#222; /* Cor de fundo do canvas */
+  border:2px solid #555; /* Borda do canvas */
+  display:block; /* Exibe o canvas como bloco */
 }
 #hud {
-  position:fixed; top:10px; left:10px;
-  color:white; font-size:20px;
-  display:none;
+  position:fixed; /* Fixa o HUD na tela */
+  top:10px; left:10px; /* Posiciona no canto superior esquerdo */
+  color:white; /* Cor do texto */
+  font-size:20px; /* Tamanho da fonte */
+  display:none; /* Inicialmente escondido */
+  background: rgba(0,0,0,0.5); /* Fundo semitransparente */
+  padding:10px 15px; /* Espaçamento interno */
+  border-radius:10px; /* Bordas arredondadas */
 }
 .screen {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  display:flex; justify-content:center; align-items:center;
-  flex-direction:column;
-  background:#111; color:white;
+  position:fixed; /* Tela de overlay */
+  top:0; left:0; width:100%; height:100%; /* Ocupa toda a tela */
+  display:flex; justify-content:center; align-items:center; /* Centraliza conteúdo */
+  flex-direction:column; /* Alinha elementos em coluna */
+  background:#111; /* Fundo escuro */
+  color:white; /* Cor do texto */
+  transition: all 0.3s; /* Transição suave para mudanças */
 }
-.screen input { width:50px; font-size:20px; text-align:center; }
+.screen input { 
+  width:60px; /* Largura do input */
+  font-size:20px; /* Tamanho da fonte */
+  text-align:center; /* Texto centralizado */
+  border-radius:5px; /* Bordas arredondadas */
+  padding:5px; /* Espaçamento interno */
+}
 .screen button {
-  margin-top:20px; padding:10px 20px;
-  font-size:20px; cursor:pointer;
+  margin-top:20px; /* Espaçamento acima do botão */
+  padding:12px 25px; /* Espaçamento interno */
+  font-size:22px; /* Tamanho da fonte */
+  cursor:pointer; /* Cursor muda para mão */
+  border:none; /* Sem borda */
+  border-radius:8px; /* Bordas arredondadas */
+  background: #0af; /* Cor de fundo azul */
+  color:white; /* Cor do texto */
+  transition: background 0.3s; /* Transição suave na cor de fundo */
 }
-#gameOverScreen { display:none; background:rgba(0,0,0,0.7); }
+.screen button:hover { background:#08c; } /* Muda cor do botão ao passar o mouse */
+#gameOverScreen { 
+  display:none; /* Inicialmente escondido */
+  background:rgba(0,0,0,0.8); /* Fundo semitransparente */
+  text-align:center; /* Texto centralizado */
+}
 #instructionScreen {
-  display:none;
-  background: rgba(0,0,0,0.9);
-  text-align: center; padding: 40px;
-  position: relative; box-sizing: border-box;
+  display:none; /* Inicialmente escondido */
+  background: rgba(0,0,0,0.9); /* Fundo escuro semitransparente */
+  text-align: center; /* Texto centralizado */
+  padding: 40px; /* Espaçamento interno */
+  position: relative; /* Para posicionar o botão fechar */
+  box-sizing: border-box; /* Inclui padding e borda no tamanho */
+  border-radius: 15px; /* Bordas arredondadas */
 }
 #instructionScreen button {
-  position: absolute; top: 10px; right: 10px;
-  font-size: 20px; cursor: pointer;
+  position: absolute; /* Posicionamento absoluto */
+  top: 10px; right: 10px; /* Canto superior direito */
+  font-size: 22px; /* Tamanho da fonte */
+  cursor:pointer; /* Cursor muda para mão */
+  background:#f33; /* Fundo vermelho */
+  color:white; /* Texto branco */
+  border:none; /* Sem borda */
+  border-radius:5px; /* Bordas arredondadas */
+  padding:5px 10px; /* Espaçamento interno */
+}
+#pauseOverlay {
+  display:none; /* Inicialmente escondido */
+  position:fixed; /* Fixa na tela */
+  top:0; left:0; width:100%; height:100%; /* Ocupa toda a tela */
+  background: rgba(0,0,0,0.7); /* Fundo semi-transparente */
+  color:white; /* Cor do texto */
+  font-size:50px; /* Tamanho da fonte */
+  justify-content:center; /* Centraliza horizontalmente */
+  align-items:center; /* Centraliza verticalmente */
+  z-index:100; /* Fica acima de outros elementos */
+  flex-direction:column; /* Alinha elementos em coluna */
 }
 </style>
 </head>
 <body>
 
+<!-- Tela inicial -->
 <div id="startScreen" class="screen">
-  <h1>Escolha o número de vidas</h1>
-  <input type="number" id="lifeInput" value="3" min="1" max="5">
-  <button id="startButton">Começar</button>
+  <h1 style="font-size:48px; color:#FFD700; margin-bottom:20px;">Falling Objects Game</h1> <!-- Título do jogo -->
+  <p style="font-size:22px; margin-bottom:10px;">Escolha o número de vidas:</p> <!-- Texto instruindo escolha de vidas -->
+  <input type="number" id="lifeInput" value="3" min="1" max="5"> <!-- Input para escolher vidas -->
+  <button id="startButton">Começar</button> <!-- Botão para iniciar -->
 </div>
 
+<!-- Tela de instruções -->
 <div id="instructionScreen" class="screen">
-  <h1>Instruções do Jogo</h1>
-  <p>Desvie dos asteroides e colete as estrelas para aumentar a pontuação.</p>
-  <p>Use o mouse ou toque na tela para mover a nave.</p>
-  <button id="closeInstructions">X</button>
+  <h1 style="font-size:36px; color:#0af; margin-bottom:20px;">Instruções</h1> <!-- Título -->
+  <p style="font-size:20px; margin:5px 0;">Desvie dos asteroides e colete as estrelas.</p>
+  <p style="font-size:20px; margin:5px 0;">Cuidado! A cada 7 estrelas perdidas, você perde 1 vida.</p>
+  <p style="font-size:20px; margin:5px 0;">Estrelas bônus valem 3 pontos e 1 vida extra!</p>
+  <p style="font-size:20px; margin:5px 0;">Use o mouse ou toque na tela para mover a nave.</p>
+  <button id="closeInstructions">X</button> <!-- Botão para fechar instruções -->
 </div>
 
+<!-- HUD (placar e vidas) -->
 <div id="hud">
   <div id="score">Pontuação: 0</div>
   <div id="lives">Vidas: 3</div>
 </div>
 
+<!-- Canvas do jogo -->
 <canvas id="gameCanvas" width="600" height="800" style="display:none;"></canvas>
 
+<!-- Tela de game over -->
 <div id="gameOverScreen" class="screen">
-  <h1>GAME OVER</h1>
-  <p id="finalScore"></p>
+  <h1 style="font-size:60px; color:red; margin-bottom:20px;">GAME OVER</h1>
+  <p id="finalScore" style="font-size:28px; margin-bottom:20px;"></p>
   <button id="restartButton">Reiniciar</button>
 </div>
 
+<!-- Overlay de pausa -->
+<div id="pauseOverlay">PAUSADO</div>
+
 <script>
 // --- ÁUDIO ---
-const starSound = new Audio('star.mp3');
-const hitSound = new Audio('hit.mp3');
-const bgm = new Audio('bgm.mp3'); bgm.loop=true; bgm.volume=0.3;
+const starSound = new Audio('star.mp3'); // Som quando coleta estrela normal
+const hitSound = new Audio('hit.mp3'); // Som quando acerta asteroide
+const bgm = new Audio('bgm.mp3'); bgm.loop=true; bgm.volume=0.3; // Música de fundo, em loop e volume reduzido
 
-// --- VARIÁVEIS ---
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const gameWidth = canvas.width, gameHeight = canvas.height;
-let mouseX = gameWidth / 2;
-let score = 0, lives = 3, level = 1, fallSpeed = 3, spawnInterval = 1000, lastSpawn = 0;
-let objects = [], starsBackground = [], asteroidParticles = [], explosionParticles = [];
-let selectedLives = 3;
-const player = { x: gameWidth/2-20, y: gameHeight-90, width:40, height:60 };
-let gameState = "start";
+// --- VARIÁVEIS DO JOGO ---
+const canvas = document.getElementById('gameCanvas'); // Canvas do jogo
+const ctx = canvas.getContext('2d'); // Contexto 2D do canvas
+const gameWidth = canvas.width, gameHeight = canvas.height; // Largura e altura do canvas
+let mouseX = gameWidth / 2; // Posição inicial do mouse
+let score = 0, lives = 3, fallSpeed = 3, spawnInterval = 1000, lastSpawn = 0; // Pontos, vidas, velocidade, intervalo de spawn
+let objects = [], starsBackground = [], asteroidParticles = [], explosionParticles = []; // Arrays de objetos e partículas
+let selectedLives = 3; // Vidas escolhidas pelo jogador
+const player = { x: gameWidth/2-20, y: gameHeight-90, width:40, height:60 }; // Dados do jogador
+let gameState = "start"; // Estado atual do jogo: start, playing, gameover
+const MAX_OBJECTS = 12; // Máximo de objetos simultâneos na tela
+let startTime = 0; // Tempo de início do jogo
+let missedStars = 0; // Estrelas perdidas
+let highScore = 0; // Recorde
+
+// --- PAUSA ---
+let isPaused = false; // Flag de pausa
+let pauseStart = 0; // Momento que o jogo foi pausado
+let pausedTime = 0; // Tempo total pausado
+const pauseOverlay = document.getElementById('pauseOverlay'); // Elemento overlay de pausa
 
 // --- ELEMENTOS HTML ---
 const startScreen = document.getElementById('startScreen');
@@ -103,185 +177,199 @@ const finalScore = document.getElementById('finalScore');
 const restartButton = document.getElementById('restartButton');
 
 // --- EVENTOS ---
+// Botão iniciar
 startButton.addEventListener('click', () => {
-  let chosen = parseInt(lifeInput.value);
-  if(isNaN(chosen) || chosen < 1) chosen = 1;
-  if(chosen > 5) chosen = 5;
-  lives = selectedLives = chosen;
-  score = 0; level = 1; fallSpeed = 3; spawnInterval = 1000; objects = [];
-  startScreen.style.display='none';
-  instructionScreen.style.display='flex';
+  let chosen = parseInt(lifeInput.value); // Pega valor do input
+  if(isNaN(chosen) || chosen < 1) chosen = 1; // Limite mínimo
+  if(chosen > 5) chosen = 5; // Limite máximo
+  lives = selectedLives = chosen; // Define vidas
+  score = 0; fallSpeed = 3; spawnInterval = 1000; objects = []; // Reinicia variáveis
+  startScreen.style.display='none'; // Esconde tela inicial
+  instructionScreen.style.display='flex'; // Mostra instruções
 });
 
+// Fechar instruções
 closeInstructions.addEventListener('click', () => {
-  instructionScreen.style.display='none';
-  canvas.style.display='block'; hud.style.display='block';
-  createBackgroundStars(100); lastSpawn = Date.now();
-  gameState='playing'; bgm.currentTime=0; bgm.play();
-  requestAnimationFrame(gameLoop);
+  instructionScreen.style.display='none'; // Esconde instruções
+  canvas.style.display='block'; hud.style.display='block'; // Mostra canvas e HUD
+  createBackgroundStars(100); // Cria 100 estrelas de fundo
+  lastSpawn = Date.now(); // Tempo do último spawn
+  startTime = Date.now(); // Tempo inicial do jogo
+  gameState='playing'; // Estado do jogo: jogando
+  bgm.currentTime=0; bgm.play(); // Reinicia e toca música
+  requestAnimationFrame(gameLoop); // Inicia loop
 });
 
+// Reiniciar após game over
 restartButton.addEventListener('click', () => {
-  lives = selectedLives; score = 0; level = 1; fallSpeed = 3; spawnInterval = 1000; objects = [];
+  lives = selectedLives; score = 0; fallSpeed = 3; spawnInterval = 1000; objects = [];
   asteroidParticles = []; explosionParticles = [];
   createBackgroundStars(100);
+  startTime = Date.now(); // Reinicia tempo
+  missedStars = 0; pausedTime = 0; // Reseta pausas
   gameOverScreen.style.display='none';
   canvas.style.display='block'; hud.style.display='block';
   gameState='playing'; bgm.currentTime=0; bgm.play();
   requestAnimationFrame(gameLoop);
 });
 
-// --- MOVIMENTO RESPONSIVO ---
-canvas.addEventListener('mousemove', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouseX = e.clientX - rect.left;
-});
-canvas.addEventListener('touchstart', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouseX = e.touches[0].clientX - rect.left;
-  e.preventDefault();
-});
-canvas.addEventListener('touchmove', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouseX = e.touches[0].clientX - rect.left;
-  e.preventDefault();
+// --- PAUSA COM TECLA ---
+document.addEventListener('keydown', (e) => {
+  if(e.code === "Space" && gameState === 'playing'){ // Tecla espaço
+    isPaused = !isPaused; // Alterna pausa
+    pauseOverlay.style.display = isPaused ? 'flex' : 'none'; // Mostra overlay
+    if(isPaused){
+      pauseStart = Date.now(); // Marca momento de pausa
+    } else {
+      pausedTime += Date.now() - pauseStart; // Atualiza tempo pausado
+      requestAnimationFrame(gameLoop); // Reinicia loop
+    }
+  }
 });
 
-// --- FUNÇÕES ---
+// --- MOVIMENTO ---
+canvas.addEventListener('mousemove', e => { 
+  const rect = canvas.getBoundingClientRect(); // Pega posição do canvas
+  mouseX = e.clientX - rect.left; // Atualiza posição X do jogador
+});
+canvas.addEventListener('touchstart', e => { 
+  const rect = canvas.getBoundingClientRect();
+  mouseX = e.touches[0].clientX - rect.left; // Touch inicial
+  e.preventDefault(); // Evita scroll
+});
+canvas.addEventListener('touchmove', e => { 
+  const rect = canvas.getBoundingClientRect();
+  mouseX = e.touches[0].clientX - rect.left; // Atualiza posição X do jogador
+  e.preventDefault(); 
+});
+
+// --- FUNÇÕES DE JOGO ---
+// Cria estrelas de fundo
 function createBackgroundStars(num){
-  starsBackground=[];
-  for(let i=0;i<num;i++){
+  starsBackground=[]; 
+  for(let i=0;i<num;i++){ 
     starsBackground.push({
-      x:Math.random()*gameWidth,
-      y:Math.random()*gameHeight,
-      size:Math.random()*2+1,
-      speed:Math.random()*0.5+0.2,
-      alpha:Math.random(),
-      pulse:Math.random()*0.05
-    });
-  }
+      x:Math.random()*gameWidth, // Posição X aleatória
+      y:Math.random()*gameHeight, // Posição Y aleatória
+      size:Math.random()*2+1, // Tamanho aleatório
+      speed:Math.random()*0.5+0.2, // Velocidade aleatória
+      alpha:Math.random(), // Transparência
+      pulse:Math.random()*0.05 // Velocidade de pulsação
+    }); 
+  } 
 }
 
+// Desenha fundo e estrelas
 function drawBackground(){
-  ctx.fillStyle="#222"; ctx.fillRect(0,0,gameWidth,gameHeight);
+  ctx.fillStyle="#222"; ctx.fillRect(0,0,gameWidth,gameHeight); // Fundo escuro
   starsBackground.forEach(star=>{
-    star.alpha += star.pulse; if(star.alpha>1||star.alpha<0.2) star.pulse*=-1;
-    const gradient=ctx.createRadialGradient(star.x,star.y,0,star.x,star.y,star.size*2);
+    star.alpha += star.pulse; if(star.alpha>1||star.alpha<0.2) star.pulse*=-1; // Pulsação
+    const gradient=ctx.createRadialGradient(star.x,star.y,0,star.x,star.y,star.size*2); // Gradiente radial
     gradient.addColorStop(0, `rgba(255,255,200,${star.alpha})`);
     gradient.addColorStop(0.5, `rgba(255,255,255,${star.alpha*0.8})`);
     gradient.addColorStop(1,"transparent");
     ctx.fillStyle=gradient;
     ctx.beginPath(); ctx.arc(star.x,star.y,star.size*2,0,Math.PI*2); ctx.fill();
-    star.y+=star.speed; if(star.y>gameHeight) star.y=0;
+    star.y+=star.speed; if(star.y>gameHeight) star.y=0; // Move estrela
   });
 }
 
-// --- OBJETOS ---
-function spawnObject(){
-  const asteroidChance = Math.min(0.7 + level*0.03, 0.95);
-  const type = Math.random() < asteroidChance ? "asteroid" : "star";
-
-  // Evita spawn colado com outro objeto
-  let x, tries = 0;
-  do {
-    x = Math.random()*(gameWidth-50);
-    tries++;
-  } while(objects.some(o => Math.abs(o.x - x) < 50) && tries < 10);
-
-  objects.push({ x:x, y:-50, width:type==="asteroid"?50:30, height:type==="asteroid"?50:30, type:type });
-}
-
-function updateObjects(){
-  const now = Date.now();
-  if(now-lastSpawn>spawnInterval){ spawnObject(); lastSpawn=now; }
-  for(let i=objects.length-1;i>=0;i--){
-    const obj = objects[i]; obj.y+=fallSpeed;
-    if(obj.x<player.x+player.width && obj.x+obj.width>player.x &&
-       obj.y<player.y+player.height && obj.y+obj.height>player.y){
-      if(obj.type==="star"){ score++; starSound.currentTime=0; starSound.play(); }
-      else { lives--; hitSound.currentTime=0; hitSound.play(); spawnExplosionParticles(player.x+player.width/2, player.y+player.height/2); if(lives<=0) gameState='gameover'; }
-      objects.splice(i,1); checkLevelUp(); continue;
-    }
-    if(obj.type==="asteroid") spawnAsteroidParticles(obj.x+obj.width/2, obj.y+obj.height/2);
-    if(obj.y>gameHeight) objects.splice(i,1);
+// --- SPAWN OBJETOS ---
+function spawnObject(){ 
+  if(objects.length>=MAX_OBJECTS) return; // Limita número de objetos
+  const asteroidChance=0.6; const bonusStarChance=0.05; // Probabilidades
+  const spawnCount=Math.min(1+Math.floor(fallSpeed/5),2); // Quantos spawns
+  for(let j=0;j<spawnCount;j++){
+    let type; const rand=Math.random();
+    if(rand<bonusStarChance) type="bonusStar";
+    else type=Math.random()<asteroidChance?"asteroid":"star";
+    let x,tries=0; const minSpacing=80;
+    do{x=Math.random()*(gameWidth-50); tries++;} while(objects.some(o=>Math.abs(o.x-x)<minSpacing)&&tries<20);
+    let size; if(type==="asteroid") size=40+Math.random()*10; else if(type==="bonusStar") size=40; else size=30;
+    objects.push({x:x,y:-50-j*70,width:size,height:size,type:type}); // Adiciona objeto
   }
 }
 
-function checkLevelUp(){
-  if(score>0 && score%7===0){
-    level++;
-    fallSpeed += 0.7;
-    if(spawnInterval>250) spawnInterval -= 70;
+// Atualiza objetos (movimento, colisão)
+function updateObjects(){ 
+  const now=Date.now();
+  if(now-lastSpawn>spawnInterval){ spawnObject(); lastSpawn=now; }
+  for(let i=objects.length-1;i>=0;i--){
+    const obj=objects[i]; obj.y+=fallSpeed; // Move objeto para baixo
+    if(obj.x<player.x+player.width && obj.x+obj.width>player.x && obj.y<player.y+player.height && obj.y+obj.height>player.y){
+      if(obj.type==="star"){ score++; starSound.currentTime=0; starSound.play(); }
+      else if(obj.type==="bonusStar"){ score+=3; if(lives<5) lives++; starSound.currentTime=0; starSound.play(); }
+      else { lives--; hitSound.currentTime=0; hitSound.play(); spawnExplosionParticles(player.x+player.width/2,player.y+player.height/2); if(lives<=0) gameState='gameover'; }
+      objects.splice(i,1); continue; // Remove objeto
+    }
+    if(obj.type==="asteroid") spawnAsteroidParticles(obj.x+obj.width/2,obj.y+obj.height/2);
+    if(obj.y>gameHeight){
+      if(obj.type==="star"){ missedStars++; if(missedStars>=7){ missedStars=0;lives--; if(lives<=0) gameState='gameover'; } }
+      objects.splice(i,1);
+    }
   }
 }
 
 // --- PARTICULAS ---
 function spawnAsteroidParticles(cx,cy,color="#bbb",count=2){ 
-  for(let i=0;i<count;i++) asteroidParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,size:Math.random()*3+1,color:color,life:25});
+  for(let i=0;i<count;i++) asteroidParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,size:Math.random()*3+1,color:color,life:25}); 
 }
 function spawnExplosionParticles(cx,cy,count=20){ 
-  for(let i=0;i<count;i++) explosionParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,size:Math.random()*4+2,color:`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0,1)`,life:40});
+  for(let i=0;i<count;i++) explosionParticles.push({x:cx,y:cy,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,size:Math.random()*4+2,color:`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0,1)`,life:40}); 
 }
-function updateParticles(){
+function updateParticles(){ 
   for(let i=asteroidParticles.length-1;i>=0;i--){let p=asteroidParticles[i]; p.x+=p.vx;p.y+=p.vy;p.life--; if(p.life<=0) asteroidParticles.splice(i,1);}
-  for(let i=explosionParticles.length-1;i>=0;i--){let p=explosionParticles[i]; p.x+=p.vx;p.y+=p.vy;p.life--; if(p.life<=0) explosionParticles.splice(i,1);}
+  for(let i=explosionParticles.length-1;i>=0;i--){let p=explosionParticles[i]; p.x+=p.vx;p.y+=p.vy;p.life--; if(p.life<=0) explosionParticles.splice(i,1);} 
 }
-function drawParticles(){
+function drawParticles(){ 
   asteroidParticles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();});
   explosionParticles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();});
 }
 
 // --- DESENHO OBJETOS ---
-function drawAsteroid(obj){
-  const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,r=obj.width/2;
-  ctx.fillStyle="#888"; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="#666"; ctx.beginPath(); ctx.arc(cx-r*0.3,cy-r*0.2,r*0.2,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx+r*0.2,cy+r*0.3,r*0.15,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle="#555"; ctx.stroke();
-}
-function drawStar(obj){
-  const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,spikes=5,outerR=obj.width/2,innerR=outerR/2;
-  let rot=Math.PI/2*3,step=Math.PI/spikes;
-  ctx.fillStyle="gold"; ctx.beginPath(); ctx.moveTo(cx,cy-outerR);
-  for(let i=0;i<spikes;i++){ ctx.lineTo(cx+Math.cos(rot)*outerR,cy+Math.sin(rot)*outerR); rot+=step; ctx.lineTo(cx+Math.cos(rot)*innerR,cy+Math.sin(rot)*innerR); rot+=step; }
-  ctx.closePath(); ctx.fill();
-}
+function drawAsteroid(obj){ const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,r=obj.width/2; ctx.fillStyle="#888"; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#666"; ctx.beginPath(); ctx.arc(cx-r*0.3,cy-r*0.2,r*0.2,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(cx+r*0.2,cy+r*0.3,r*0.15,0,Math.PI*2); ctx.fill(); ctx.strokeStyle="#555"; ctx.stroke(); }
+function drawStar(obj){ const cx=obj.x+obj.width/2,cy=obj.y+obj.height/2,spikes=5,outerR=obj.width/2,innerR=outerR/2; let rot=Math.PI/2*3,step=Math.PI/spikes; if(obj.type==="bonusStar"){ const alpha=0.5+0.4*Math.random(); ctx.fillStyle=`rgba(0,191,255,${alpha})`; } else ctx.fillStyle="gold"; ctx.beginPath(); ctx.moveTo(cx,cy-outerR); for(let i=0;i<spikes;i++){ ctx.lineTo(cx+Math.cos(rot)*outerR,cy+Math.sin(rot)*outerR); rot+=step; ctx.lineTo(cx+Math.cos(rot)*innerR,cy+Math.sin(rot)*innerR); rot+=step; } ctx.closePath(); ctx.fill(); }
 function drawObjects(){ objects.forEach(o=>o.type==="asteroid"?drawAsteroid(o):drawStar(o)); }
 
 // --- PLAYER ---
-function updatePlayer(){
-  player.x = mouseX - player.width / 2;
-  if(player.x < 0) player.x = 0;
-  if(player.x > gameWidth - player.width) player.x = gameWidth - player.width;
-}
-function drawPlayer(){
-  ctx.fillStyle="gray"; ctx.fillRect(player.x,player.y,player.width,player.height);
-  const blink=Math.random()*0.5+0.5;
-  ctx.fillStyle=`rgba(0,191,255,${blink})`;
-  ctx.fillRect(player.x+player.width*0.3,player.y+player.height*0.1,player.width*0.4,player.height*0.25);
-  ctx.fillStyle="red";
-  ctx.beginPath(); ctx.moveTo(player.x,player.y+player.height*0.6); ctx.lineTo(player.x-12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(player.x+player.width,player.y+player.height*0.6); ctx.lineTo(player.x+player.width+12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill();
-}
+function updatePlayer(){ player.x=mouseX-player.width/2; if(player.x<0)player.x=0;if(player.x>gameWidth-player.width)player.x=gameWidth-player.width; }
+function drawPlayer(){ ctx.fillStyle="gray"; ctx.fillRect(player.x,player.y,player.width,player.height); const blink=Math.random()*0.5+0.5; ctx.fillStyle=`rgba(0,191,255,${blink})`; ctx.fillRect(player.x+player.width*0.3,player.y+player.height*0.1,player.width*0.4,player.height*0.25); ctx.fillStyle="red"; ctx.beginPath(); ctx.moveTo(player.x,player.y+player.height*0.6); ctx.lineTo(player.x-12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(player.x+player.width,player.y+player.height*0.6); ctx.lineTo(player.x+player.width+12,player.y+player.height); ctx.lineTo(player.x+player.width*0.5,player.y+player.height*0.7); ctx.closePath(); ctx.fill(); }
 
 // --- HUD ---
 function updateHUD(){ scoreEl.innerText="Pontuação: "+score; livesEl.innerText="Vidas: "+lives; }
 
 // --- LOOP PRINCIPAL ---
 function gameLoop(){
-  if(gameState!=="playing"){
-    if(gameState==="gameover"){ bgm.pause(); canvas.style.display='none'; hud.style.display='none'; gameOverScreen.style.display='flex'; finalScore.innerText="Pontuação final: "+score; }
+  if(gameState!=="playing" || isPaused){
+    if(gameState==="gameover"){ 
+      bgm.pause(); 
+      canvas.style.display='none'; hud.style.display='none'; 
+      gameOverScreen.style.display='flex'; 
+      if(score>highScore) highScore=score; 
+      finalScore.innerHTML="Pontuação final: "+score+"<br>Recorde: "+highScore; 
+    }
     return;
   }
-  drawBackground();
-  updatePlayer();
-  updateObjects();
-  updateParticles();
-  drawObjects();
-  drawPlayer();
-  drawParticles();
-  updateHUD();
-  requestAnimationFrame(gameLoop);
+
+  const elapsed = (Date.now() - startTime - pausedTime)/1000; // Tempo decorrido em segundos
+  const blockDuration = 30; // Intervalo para aumentar dificuldade
+  const block = Math.floor(elapsed / blockDuration); // Quantos blocos de dificuldade já passaram
+  const blockProgress = Math.min((elapsed % blockDuration) / blockDuration, 1); // Progresso dentro do bloco
+  const baseSpeed = 3 + block * 2; // Velocidade base
+  const baseSpawn = 1000 - block * 100; // Intervalo base de spawn
+  fallSpeed = baseSpeed + blockProgress*2; // Velocidade final com progresso
+  spawnInterval = Math.max(300, baseSpawn - blockProgress*100); // Intervalo final com progresso
+
+  drawBackground(); // Desenha fundo
+  updatePlayer(); // Atualiza jogador
+  updateObjects(); // Atualiza objetos
+  updateParticles(); // Atualiza partículas
+  drawObjects(); // Desenha objetos
+  drawPlayer(); // Desenha jogador
+  drawParticles(); // Desenha partículas
+  updateHUD(); // Atualiza HUD
+
+  requestAnimationFrame(gameLoop); // Chama loop novamente
 }
 </script>
 </body>
